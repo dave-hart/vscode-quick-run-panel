@@ -2,7 +2,7 @@
     "name": "quick-run-panel",
     "displayName": "quick-run-panel",
     "description": "view and run vscode tasks and debug configurations",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "davehart",
     "icon": "resources/icon.png",
     "repository": {
