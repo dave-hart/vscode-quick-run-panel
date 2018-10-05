@@ -2,12 +2,12 @@
     "name": "quick-run-panel",
     "displayName": "quick-run-panel",
     "description": "view and run vscode tasks and debug configurations",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "davehart",
     "icon": "resources/icon.png",
     "repository": {
         "type": "git",
-        "url": "https://github.ibm.com/ibmi2/vscode-tasks-panel"
+        "url": "https://github.com/dave-hart/vscode-quick-run-panel"
     },
     "engines": {
         "vscode": "^1.27.0"

@@ -26,6 +26,6 @@ The defaults values are:
 * `QuickRunPanel.includeDebugConfigs`: true
 * `QuickRunPanel.taskSources`:['workspace']
 
-### 0.0.1
+### 0.0.3
 
-Initial release of VSCODE Tasks Panel
+Fix git hub link
