@@ -6,17 +6,17 @@ export class DataProvider implements TreeDataProvider<TaskElement> {
 	readonly onDidChangeTreeData: Event<TaskElement | undefined> = this._onDidChangeTreeData.event;
 	constructor(private context: ExtensionContext) {
 	}
- // todo
+ 	// todo
 	refresh(): void {
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(undefined);
 	}
 
 	getTreeItem(element: TaskElement): TreeItem {
 		return element;
 	}
 
-  getChildren(element?: any): Thenable<TaskElement[]> {
-    return Promise.resolve(this.getAllContent());
+  	getChildren(element?: any): Thenable<TaskElement[]> {
+    	return Promise.resolve(this.getAllContent());
 	}
 
 	/**
@@ -25,10 +25,10 @@ export class DataProvider implements TreeDataProvider<TaskElement> {
 	private async getAllTasks(): Promise<TaskElement[]> {
     let taskElements: TaskElement[] = [];
     let allTasks = await tasks.fetchTasks();
-    allTasks.forEach(task => {
+    allTasks.forEach((task: any) => {
 			let taskSources = workspace.getConfiguration().get("QuickRunPanel.taskSources") as string[];
 			if (taskSources.some(value => value === task.source)) {
-				taskElements.push(new TaskElement(task, TreeItemCollapsibleState.None, this.context));
+				taskElements.push(new TaskElement(task, TreeItemCollapsibleState.None, this.context, null));
 			}
 		});
 		return taskElements;
@@ -48,11 +48,26 @@ export class DataProvider implements TreeDataProvider<TaskElement> {
 
 	private getAllLaunchConfigs(): TaskElement[] {
 		let launchElements: TaskElement[] = [];
-		const config = workspace.getConfiguration('launch').get('configurations') as Array<DebugConfiguration>;
-		config.forEach(conf => {
-			launchElements.push(new TaskElement(conf, TreeItemCollapsibleState.None, this.context));
-		});
-		return launchElements;
+        const addConfig = (workspaceIndex: number | null, conf: any) => {
+            launchElements.push(new TaskElement(conf, TreeItemCollapsibleState.None, this.context, workspaceIndex));
+        };
+
+		const folders = workspace.workspaceFolders;
+        if (folders && (folders.length > 1)) {
+            folders.forEach((folder: any, index: number) => {
+                const config: Object[] | undefined = workspace.getConfiguration("launch", folder.uri).get("configurations");
+				if (config) {
+					config.forEach(addConfig.bind(this, index));
+				}
+            });
+        } else {
+            const config: Object[] | undefined = workspace.getConfiguration("launch").get("configurations");
+			if (config) {
+				config.forEach(addConfig.bind(this, null));
+			}
+        }
+        
+        return launchElements;
 	}
 }
 
@@ -61,6 +76,7 @@ export class TaskElement extends TreeItem {
 		public readonly _task: Task | DebugConfiguration,
 		public readonly collapsibleState: TreeItemCollapsibleState,
 		private context: ExtensionContext,
+		public readonly index: number | null
 	) {
 		super(_task.name, collapsibleState);
 		let args: Task | string;
@@ -72,13 +88,15 @@ export class TaskElement extends TreeItem {
 		super.command = {
 			title: "title",
 			command: "quickRunPanel.runSelection",
-			arguments: [args]
+			arguments: [args, index]
 		};
+
+		this.tooltip = `${this._task.name}`;
 	}
 
-	get tooltip(): string {
+	/*get tooltip(): string {
 		return `${this._task.name}`;
-	}
+	}*/
 
 	iconPath = {
 		light: this.context.asAbsolutePath(path.join('resources', 'light', 'task.svg')),
